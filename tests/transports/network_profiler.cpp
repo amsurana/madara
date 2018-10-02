@@ -7,10 +7,19 @@
 #include "madara/utility/Utility.h"
 #include "madara/utility/EpochEnforcer.h"
 
+#ifdef _USE_SSL_
+#include "madara/filters/ssl/AESBufferFilter.h"
+#endif
+
+#ifdef _USE_LZ4_
+#include "madara/filters/lz4/LZ4BufferFilter.h"
+#endif
+
 namespace utility = madara::utility;
 namespace logger = madara::logger;
 namespace knowledge = madara::knowledge;
 namespace transport = madara::transport;
+namespace filters = madara::filters;
 
 // default transport settings
 std::string host("");
@@ -20,6 +29,14 @@ double test_time(60);
 size_t data_size(128);
 double send_hertz(-1);
 size_t num_vars(1);
+
+#ifdef _USE_SSL_
+filters::AESBufferFilter ssl_transport_filter;
+#endif
+
+#ifdef _USE_LZ4_
+filters::LZ4BufferFilter lz4_transport_filter;
+#endif
 
 // handle command line arguments
 void handle_arguments(int argc, char** argv)
@@ -111,6 +128,15 @@ void handle_arguments(int argc, char** argv)
 
       ++i;
     }
+    else if (arg1 == "-lz4" || arg1 == "--lz4")
+    {
+#ifdef _USE_LZ4_
+      settings.add_filter(&lz4_transport_filter);
+#else
+      madara_logger_ptr_log(logger::global_logger.get(), logger::LOG_ERROR,
+          "ERROR: parameter (-lz4|--lz4) requires feature lz4\n");
+#endif
+    }
     else if (arg1 == "--num-vars")
     {
       if (i + 1 < argc)
@@ -169,6 +195,27 @@ void handle_arguments(int argc, char** argv)
 
       ++i;
     }
+    else if (arg1 == "-ssl" || arg1 == "--ssl")
+    {
+#ifdef _USE_SSL_
+      if (i + 1 < argc)
+      {
+        ssl_transport_filter.generate_key(argv[i + 1]);
+        settings.add_filter(&ssl_transport_filter);
+        ++i;
+      }
+      else
+      {
+        madara_logger_ptr_log(logger::global_logger.get(), logger::LOG_ERROR,
+            "ERROR: parameter (-ssl|--ssl) requires password\n");
+      }
+#else
+      madara_logger_ptr_log(logger::global_logger.get(), logger::LOG_ERROR,
+          "ERROR: parameter (-ssl|--ssl) requires feature ssl compiled into "
+          "MADARA\n");
+      ++i;
+#endif
+    }
     else if (arg1 == "-t" || arg1 == "--time")
     {
       if (i + 1 < argc)
@@ -217,6 +264,7 @@ void handle_arguments(int argc, char** argv)
           "non-negative)\n"
           " [-l|--level level]       the logger level (0+, higher is higher "
           "detail)\n"
+          " [-lz4|--lz4]             use lz4 compression on network\n"
           " [-m|--multicast ip:port] the multicast ip to send and listen to\n"
           " [--num-vars vars]        the number of vars to split size up into\n"
           " [-o|--host hostname]     the hostname of this process "
@@ -224,6 +272,7 @@ void handle_arguments(int argc, char** argv)
           " [-q|--queue-length len   the buffer size to use for the test\n"
           " [-r|--reduced]           use the reduced message header\n"
           " [-s|--size size]         size of data packet to send in bytes\n"
+          " [-ssl|--ssl pass]        encrypt with pass over network\n"
           " [--send-hz hertz]        hertz to send at\n"
           " [-t|--time time]         time to burst messages for throughput "
           "test\n"

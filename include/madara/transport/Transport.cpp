@@ -246,7 +246,7 @@ int process_received_update(const char* buffer, uint32_t bytes_read,
     return -1;
   }
 
-  if (!is_reduced)
+  if (!is_reduced && !is_fragment)
   {
     // reject the message if it is us as the originator (no update necessary)
     if (id == header->originator)
@@ -351,12 +351,17 @@ int process_received_update(const char* buffer, uint32_t bytes_read,
           " Message has been pieced together from fragments. Processing...\n",
           print_prefix);
 
+      // call decodes, if applicable
+      bytes_read = (uint32_t)settings.filter_decode(
+          (char*)message, max_buffer_size, max_buffer_size);
+          
       /**
        * if we defragged the message, then we need to process the message.
        * In order to do that, we need to overwrite buffer with message
        * so it can be processed normally.
        **/
       buffer_remaining = (int64_t)frag_header->get_size(message);
+
       if (buffer_remaining <= settings.queue_length)
       {
         char* buffer_override = (char*)buffer;

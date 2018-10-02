@@ -579,12 +579,20 @@ int madara::transport::QoSTransportSettings::filter_decode(
             "QoSTransportSettings::filter_decode: filter is not null\n");
       }
 
+      // check for buffer filter or fragment match
       if (header.check_filter(*i))
       {
         madara_logger_ptr_log(logger::global_logger.get(), logger::LOG_MAJOR,
             "QoSTransportSettings::filter_decode: buffer filter %s is a "
             "match\n",
             header.id);
+      }
+      else if (strncmp (header.id, "KFRG", 4) == 0)
+      {
+        madara_logger_ptr_log(logger::global_logger.get(), logger::LOG_MAJOR,
+            "QoSTransportSettings::filter_decode: fragment must delay\n");
+
+        break;
       }
       else
       {
