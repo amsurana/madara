@@ -927,7 +927,13 @@ inline void ThreadSafeContext::mark_and_signal(
 
   if (settings.stream_changes && streamer_ != nullptr)
   {
-    streamer_->enqueue(ref.get_name(), *ref.get_record_unsafe());
+    auto rec_ptr = ref.get_record_unsafe();
+    if (rec_ptr->has_history())
+    {
+      rec_ptr = &rec_ptr->ref_newest();
+    }
+
+    streamer_->enqueue(ref.get_name(), *rec_ptr);
   }
 
   if (settings.signal_changes)
@@ -946,6 +952,12 @@ inline void ThreadSafeContext::mark_modified(
     const VariableReference& ref, const KnowledgeUpdateSettings& settings)
 {
   MADARA_GUARD_TYPE guard(mutex_);
+
+  auto record = ref.get_record_unsafe();
+
+  record->clock = clock_;
+  record->set_toi(utility::get_time());
+
   mark_and_signal(ref, settings);
 }
 
@@ -1076,9 +1088,13 @@ inline void ThreadSafeContext::apply_modified(void)
         // i->second.status = KnowledgeRecord::MODIFIED;
 
         if (entry.second.status() != knowledge::KnowledgeRecord::UNCREATED)
-          mark_and_signal(&entry, KnowledgeUpdateSettings());
+        {
+          mark_modified(&entry, KnowledgeUpdateSettings());
+        }
         else
+        {
           entry.second.set_value(KnowledgeRecord::Integer(0));
+        }
 
         // i->second.clock = this->clock_;
       }
