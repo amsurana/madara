@@ -35,7 +35,7 @@ public:
   /**
    * Constructor
    **/
-  BufferFilterHeader() : size(20), id(""), version(0) {}
+  BufferFilterHeader() : size(20), version(0) {}
 
   /**
    * Returns the size of the encoded BufferFilterHeader class
@@ -88,7 +88,7 @@ public:
   /**
    * filter id
    **/
-  char id[8];
+  char id[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
   /**
    * filter version
