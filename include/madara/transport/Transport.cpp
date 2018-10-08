@@ -956,18 +956,19 @@ long Base::prep_send(const knowledge::KnowledgeMap& orig_updates,
 
           filtered_updates.emplace(std::make_pair(e.first, record));
         }
-        else
-        {
-          std::stringstream message;
-          message << print_prefix;
-          message << ": record " << e.first << " produced a null record ";
-          message << "from get_record_unsafe ()\n";
+        // breaks things in tutorial
+        // else
+        // {
+        //   std::stringstream message;
+        //   message << print_prefix;
+        //   message << ": record " << e.first << " produced a null record ";
+        //   message << "from get_record_unsafe ()\n";
 
-          madara_logger_log(
-              context_.get_logger(), logger::LOG_ERROR, message.str().c_str());
+        //   madara_logger_log(
+        //       context_.get_logger(), logger::LOG_ERROR, message.str().c_str());
 
-          throw exceptions::MemoryException(message.str());
-        }
+        //   throw exceptions::MemoryException(message.str());
+        // }
       }
     }
   }
