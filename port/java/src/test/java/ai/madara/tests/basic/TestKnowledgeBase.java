@@ -47,7 +47,7 @@
 
 package ai.madara.tests.basic;
 
-import org.junit.Assert;
+import static org.junit.Assert.*;
 import org.junit.Test;
 
 import ai.madara.exceptions.MadaraDeadObjectException;
@@ -69,7 +69,6 @@ public class TestKnowledgeBase extends BaseTest {
 	public void testKBToKnowledgeMap() throws MadaraDeadObjectException {
 
 		KnowledgeBase knowledge = initKnowledgeBase();
-
 		Integer age = new Integer();
 		age.setName(knowledge, "age");
 		age.set(24);
@@ -90,12 +89,12 @@ public class TestKnowledgeBase extends BaseTest {
 
 		KnowledgeMap deviceSettings = knowledge.toKnowledgeMap("device.", "settings");
 
-		Assert.assertTrue(deviceSettings.containsKey("device.0.test.settings"));
-		Assert.assertTrue(deviceSettings.containsKey("device.1.test.settings"));
-		Assert.assertTrue(deviceSettings.containsKey("device.2.test.settings"));
+		assertTrue(deviceSettings.containsKey("device.0.test.settings"));
+		assertTrue(deviceSettings.containsKey("device.1.test.settings"));
+		assertTrue(deviceSettings.containsKey("device.2.test.settings"));
 
-		Assert.assertNull(deviceSettings.get("device.2"));
-		Assert.assertNull(deviceSettings.get("device.location"));
+		assertNull(deviceSettings.get("device.2"));
+		assertNull(deviceSettings.get("device.location"));
 
 	}
 
@@ -110,16 +109,16 @@ public class TestKnowledgeBase extends BaseTest {
 
 		KnowledgeBase clonedKb = new KnowledgeBase(defaultKb);
 
-		Assert.assertNotEquals(clonedKb.getCPtr(), defaultKb.getCPtr());
+		assertNotEquals(clonedKb.getCPtr(), defaultKb.getCPtr());
 
-		Assert.assertEquals(clonedKb.get("age").toLong(), defaultKb.get("age").toLong());
+		assertEquals(clonedKb.get("age").toLong(), defaultKb.get("age").toLong());
 
 		Any clonedAnyType = clonedKb.get("location").toAny();
 		Geo.Point.Reader reader = clonedAnyType.reader(Geo.Point.factory);
 
-		Assert.assertEquals(DEFAULT_GEO_POINT[0], reader.getX(), 0);
-		Assert.assertEquals(DEFAULT_GEO_POINT[1], reader.getY(), 0);
-		Assert.assertEquals(DEFAULT_GEO_POINT[2], reader.getZ(), 0);
+		assertEquals(DEFAULT_GEO_POINT[0], reader.getX(), 0);
+		assertEquals(DEFAULT_GEO_POINT[1], reader.getY(), 0);
+		assertEquals(DEFAULT_GEO_POINT[2], reader.getZ(), 0);
 
 	}
 

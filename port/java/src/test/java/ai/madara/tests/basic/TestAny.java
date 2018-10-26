@@ -47,9 +47,10 @@
 
 package ai.madara.tests.basic;
 
+import static org.junit.Assert.*;
+
 import org.capnproto.MessageBuilder;
 import org.capnproto.StructList.Builder;
-import org.junit.Assert;
 import org.junit.Test;
 
 import ai.madara.knowledge.Any;
@@ -67,6 +68,8 @@ public class TestAny extends BaseTest {
 	/**
 	 * All the Any types are registered in {@link BaseTest#registerAnyTypes()}
 	 * 
+	 * Test all primitive data types (char, long, int, float, double) and String.
+	 * 
 	 * @throws InterruptedException
 	 * @throws Exception
 	 */
@@ -78,27 +81,82 @@ public class TestAny extends BaseTest {
 
 		Any anyChar = new Any("char");
 		anyChar.assign('A');
-		Assert.assertEquals("A", anyChar.toString());
+		assertEquals("A", anyChar.toString());
+
+		Any anyLong = new Any("long");
+		anyLong.assign(Long.MAX_VALUE);
+		assertEquals(Long.MAX_VALUE, anyLong.toInteger());
 
 		Any anyInt = new Any("int");
-		anyInt.assign(100);
-		Assert.assertEquals(100, anyInt.toInteger());
+		anyInt.assign(Integer.MIN_VALUE);
+		assertEquals(Integer.MIN_VALUE, anyInt.toInteger());
+		assertEquals("" + Integer.MIN_VALUE, anyInt.toString());
 
 		Any anyFloat = new Any("float");
 		anyFloat.assign(123f);
-		Assert.assertEquals(123f, anyFloat.toDouble(), 0.0);
+		assertEquals(123f, anyFloat.toDouble(), 0.0);
 
 		Any anyDouble = new Any("double");
 		anyDouble.assign(3.14159);
-		Assert.assertEquals((double) 22 / 7, anyDouble.toDouble(), 0.1);
+		assertEquals((double) 22 / 7, anyDouble.toDouble(), 0.01);
 
 		Any anyStr = new Any("string");
 		anyStr.assign("Jungle Book");
-		Assert.assertEquals("Jungle Book", anyStr.toString());
+		assertEquals("Jungle Book", anyStr.toString());
 
 	}
 
-	public void testListsTypes() {
+	/**
+	 * 
+	 * @throws BadAnyAccess
+	 */
+	@Test
+	public void testVectorTypes() throws BadAnyAccess {
+
+		// Test String vector
+		Any strVectorAny = new Any("strvec");
+		strVectorAny.at(5).assign("fifth");
+		strVectorAny.at(7).assign("seventh");
+		strVectorAny.at(2).assign("second");
+
+		assertFalse(strVectorAny.at(0).empty());
+		assertNotNull(strVectorAny.at(2));
+		assertEquals(strVectorAny.at(2).toString(), "second");
+
+		// Test double vector
+		Any dblVectorAny = new Any("dblvec");
+		dblVectorAny.at(3).assign(3.1415);
+		dblVectorAny.at(1).assign(1);
+		dblVectorAny.at(100).assign(100);
+
+		assertEquals((double) 22 / 7, dblVectorAny.at(3).toDouble(), 0.01);
+		assertEquals(3, dblVectorAny.at(3).toInteger());
+		assertEquals(1.0000, dblVectorAny.at(1).toDouble(), 0.0);
+		assertEquals(100, dblVectorAny.at(100).toInteger());
+
+		// Test Long vector
+		Any longVectorAny = new Any("longvec");
+		longVectorAny.at(1).assign(Long.MAX_VALUE);
+		longVectorAny.at(20).assign(Long.MIN_VALUE);
+
+		assertEquals(Long.MAX_VALUE, longVectorAny.at(1).toInteger());
+		assertEquals(Long.MIN_VALUE, longVectorAny.at(20).toInteger());
+
+		// Test int vector
+		Any intVectorAny = new Any("intvec");
+		intVectorAny.at(1).assign(Integer.MAX_VALUE);
+		intVectorAny.at(2).assign(Integer.MIN_VALUE);
+
+		assertEquals(Integer.MAX_VALUE, intVectorAny.at(1).toInteger());
+		assertEquals(Integer.MIN_VALUE, intVectorAny.at(2).toInteger());
+
+		// Test int vector
+		Any shVectorAny = new Any("shvec");
+		shVectorAny.at(1).assign(Short.MAX_VALUE);
+		shVectorAny.at(2).assign(Short.MIN_VALUE);
+
+		assertEquals(Short.MAX_VALUE, shVectorAny.at(1).toInteger());
+		assertEquals(Short.MIN_VALUE, shVectorAny.at(2).toInteger());
 
 	}
 
@@ -106,16 +164,7 @@ public class TestAny extends BaseTest {
 		Any a0 = new Any("smap");
 		a0.at("hello").assign("world");
 
-		Assert.assertEquals(a0.at("hello").toString(), "world");
-
-		Any a1 = new Any("strvec");
-		a1.at(5).assign("fifth");
-		a1.at(7).assign("seventh");
-		a1.at(2).assign("second");
-
-		Assert.assertFalse(a1.at(0).empty());
-		Assert.assertNotNull(a1.at(2));
-		Assert.assertEquals(a1.at(2).toString(), "second");
+		assertEquals(a0.at("hello").toString(), "world");
 
 	}
 
@@ -124,9 +173,9 @@ public class TestAny extends BaseTest {
 		Any c0 = getGeoPoint();
 
 		Geo.Point.Reader reader = c0.reader(Geo.Point.factory);
-		Assert.assertEquals(reader.getX(), DEFAULT_GEO_POINT[0], 0.0);
-		Assert.assertEquals(reader.getY(), DEFAULT_GEO_POINT[1], 0.01);
-		Assert.assertEquals(reader.getZ(), DEFAULT_GEO_POINT[2], 0);
+		assertEquals(reader.getX(), DEFAULT_GEO_POINT[0], 0.0);
+		assertEquals(reader.getY(), DEFAULT_GEO_POINT[1], 0.01);
+		assertEquals(reader.getZ(), DEFAULT_GEO_POINT[2], 0);
 	}
 
 	@Test
@@ -157,7 +206,7 @@ public class TestAny extends BaseTest {
 		Reader obj = person.reader(Person.Bio.factory);
 
 		// Assertion
-		Assert.assertEquals(obj.getName().toString(), "Amit S");
+		assertEquals(obj.getName().toString(), "Amit S");
 	}
 
 }

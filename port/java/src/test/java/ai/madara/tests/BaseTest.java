@@ -30,9 +30,16 @@ public class BaseTest {
 		Any.registerString("string");
 		Any.registerChar("char");
 		Any.registerFloat("float");
+		Any.registerLong("long");
 
 		Any.registerStringVector("strvec");
 		Any.registerDoubleVector("dblvec");
+		Any.registerLongVector("longvec");
+		Any.registerIntVector("intvec");
+		Any.registerShortVector("shvec");
+		Any.registerFloatVector("floatvec");
+		
+		
 		Any.registerStringToStringMap("smap");
 		Any.registerClass("Point", Geo.Point.factory);
 		Any.registerClass("PersonBio", Person.Bio.factory);
